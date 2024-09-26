@@ -41,9 +41,15 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     if [[ "$OS" == "MX Linux" ]]; then
         echo "MX Linux detected."
   MXANDDEBIAN="1"
+  #remove some of the mx rubbish
+  sudo apt-get remove --purge libreoffice* thunderbir* peg-e swell-foop lbreakout2* gnome-mahjongg mc
+  sudo apt-get autoremove --purge
+  sudo apt-get autoclean
+  sudo apt-get clean
+  sudo apt update
+  sudo apt upgrade -y
+  sudo apt install git
   # Continue with normal script execution for MX Linux
-
-
 
 ##################################################################
 ###   DEBAIAN BASE            ####################################
@@ -233,7 +239,7 @@ install_aur_packages
             libyajl-dev asciidoc xmlto libpod-simple-perl docbook-xml libpcre3-dev libstartup-notification0-dev libcairo2-dev \
             abook alacritty axel bash buku ca-certificates cargo cava cmus curl ddgr dialog distrobox docker docker-compose \
             duf dunst dwm falkon featherpad feh ffmpeg flatpak fonts-jetbrains-mono fzf git gparted i3 intel-media-va-driver \
-            intel-microcode isync kodi libsox-fmt-all mesa-vulkan-drivers minidlna moc mpd neomutt notmuch nwipe openssh optipng \
+            intel-microcode isync kodi libsox-fmt-all mesa-vulkan-drivers minidlna moc wildmidi mpd neomutt notmuch nwipe openssh optipng \
             pandoc pass pavucontrol picom pipx podman policykit-1-gnome powerline pulseaudio pwman3 python-i3ipc python-pip \
             python-pynvim qutebrowser ranger rename ripgrep rofi sox spice-vdagent sshfs st suckless-tools sudo surf sway \
             urlview wget xfce4-terminal xterm ufw yad the_silver_searcher --noconfirm
@@ -269,11 +275,13 @@ fi
 ###   MX $ DEBIAN ONLY DEPEND ####################################
 ##################################################################
 if [[ "$MXANDDEBIAN" == "1" ]]; then
+
 ##################################################################
 ###   APT DEPENDENCIES        ####################################
 ##################################################################
 		# List of dependencies to check
 		dependencies=( 'spice-webdavd' 'sweeper' 'tesseract-ocr' 'tkremind' 'tldr' 'tmux' 'trash-cli' 'ueberzug' 'vim' 'vulkan-tools' 'vulkan-validationlayers' 'xcape' 'xclip' 'xdo' 'zip' 'unzip' \
+		'cmake' 'wildmidi' \
 		'pkg-config' 'libxcb-xfixes0-dev' 'libxcb-cursor-dev' 'libxcb-util-dev' 'libxkbcommon-dev' 'libxkbcommon-x11-dev' 'libxcb-keysyms1-dev' 'libxcb-xrm-dev' 'libev-dev' \
 		'libyajl-dev' 'asciidoc' 'xmlto' 'libpod-simple-perl' 'docbook-xml' 'libpcre3-dev' 'libstartup-notification0-dev' 'libpango1.0-dev' 'libcairo2-dev' \
 		'abook' 'alacritty' 'axel' 'bash' 'buku' 'ca-certificates' 'cargo' 'cava' 'cmus' \
@@ -318,10 +326,6 @@ if [[ "$MXANDDEBIAN" == "1" ]]; then
 		fi
 
 
-
-		fi
-
-
 ##################################################################
 ###   CUBIC DEBIAN $ DERIV    ####################################
 ##################################################################
@@ -332,6 +336,29 @@ curl -S "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x081525e2b4f1283
 sudo apt update
 sudo apt install --no-install-recommends cubic
 
+##################################################################
+###   NEOVIM 10 and DERIVATIV ####################################
+##################################################################
+
+
+		if [[ -d /home/batan/.config/nvim/ ]]; then
+		mv /home/batan/.config/nvim/ /home/batan/.config/nvim.BAK
+		fi
+
+		sudo mkdir -p /home/batan/.config/nvim/pack/plugins/start/
+		sudo mkdir -p /home/batan/.config/nvim/templates/
+		wget https://github.com/neovim/neovim/releases/download/v0.10.1/nvim-linux64.tar.gz
+		tar vfxz nvim-linux64.tar.gz
+		sudo cp nvim-linux64/bin/nvim /usr/bin/
+		sudo cp  nvim-linux64/shareapplications/nvim.desktop /home/batan/.config/autostart/
+		sudo mkdir -p /usr/local/share/nvim
+		sudo cp -r /home/batan/nvim-linux64/share/nvim/runtime/*	/usr/local/share/nvim
+		sudo chmod a+x /usr/bin/nvim
+		sudo chown -R batan:batan /home/
+
+	# exit the conditional $MXANDDEBIAN (based) only systems installation with the following fi
+
+	fi
 
 ##################################################################
 ###   MAIN PART               ####################################
@@ -419,11 +446,11 @@ git clone https://github.com/batann/vim.git
 git clone https://github.com/batann/mutt-wizard.git
 git clone https://github.com/batann/i3.git
 git clone https://github.com/batann/grub.git
+git clone https://github.com/batann/mpd.git
 git clone https://github.com/vimwiki/vimwiki.git /home/batan/.config/nvim/pack/plugins/start/vimwiki
 git clone https://github.com/farseer90718/vim-taskwarrior ~/.config/nvim/pack/plugins/start/vim-taskwarrior
 git clone https://github.com/tools-life/taskwiki.git /home/batan/.config/nvim/pack/plugins/start/taskwiki --branch dev
 git clone https://github.com/tpope/vim-surround.git /home/batan/.config/nvim/pack/plugins/start/surround-vim
-#git clone https://github.com/batann/
 #git clone https://github.com/batann/
 #git clone https://github.com/batann/
 #git clone https://github.com/batann/
@@ -443,17 +470,18 @@ sudo make insall && cd
 ###   run install files   ########################################
 ##################################################################
 sudo bash /home/batan/.dot/install.sh
-sudo -u batan bash lc-cd/install.sh
-sudo -u batan bash hosts/install.sh
-sudo -u batan bash nautilus-scripts/install.sh
-sudo -u batan bash mutt-wizard/install.sh
+sudo -u batan bash /home/batan/lc-cd/install.sh
+sudo -u batan bash /home/batan/hosts/install.sh
+sudo -u batan bash /home/batan/nautilus-scripts/install.sh
+sudo -u batan bash /home/batan/mutt-wizard/install.sh
+sudo -u batan bash /home/batan/mpd/install.sh
 cd /home/batan/mutt-wizard
 sudo make install
 cd
-sudo -u batan bash vim/install.sh
-sudo -u batan bash i3/install.sh
-sudo -u batan bash grub/install.first.sh
-sudo -u batan bash grub/install.sh
+sudo -u batan bash /home/batan/vim/install.sh
+sudo -u batan bash /home/batan/i3/install.sh
+sudo -u batan bash /home/batan/grub/install.first.sh
+sudo -u batan bash /home/batan/grub/install.sh
 sudo trash .dot lc-cd hosts nautilus-scripts mutt-wizard vim i3
 ##################################################################
 ###   GPG                     ####################################
@@ -493,40 +521,63 @@ key_name="id_rsa"
 key_location="$HOME/.ssh/$key_name"
 ssh-keygen -t rsa -b 4096 -f "$key_location" -N ""
 
+###   Function to detect the init system   ###########
+get_init_system() {
+    if [ -f /run/systemd/system ]; then
+        echo "systemd"
+    elif command -v service >/dev/null; then
+        echo "SysVinit"
+    elif command -v rc-service >/dev/null; then
+        echo "OpenRC"
+    elif command -v initctl >/dev/null; then
+        echo "Upstart"
+    else
+        echo "unknown"
+    fi
+}
+
 ###   Function to configure SSH on a remote machine   ###########
 configure_ssh() {
     # SSH configuration file path
-    ssh_config="/etc/ssh/sshd_config"
+    local ssh_config="/etc/ssh/sshd_config"
+    local init_system=$(get_init_system)  # Detect the init system
+sudo cp $ssh_config "$ssh_config.bak"
     # Combine all SSH configuration changes into one command
     ssh -o "StrictHostKeyChecking=no" -o "PasswordAuthentication=no" "$1" "\
         sudo sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' $ssh_config && \
         sudo sed -i 's/#AuthorizedKeysFile/AuthorizedKeysFile/' $ssh_config && \
-        sudo service ssh restart"
-aa}
-
+        # Restart SSH service based on the detected init system
+        $(case "$init_system" in
+            systemd) echo "sudo systemctl restart ssh";;
+            SysVinit) echo "sudo service ssh restart";;
+            OpenRC) echo "sudo rc-service sshd restart";;
+            Upstart) echo "sudo stop ssh && sudo start ssh";;
+            *) echo "echo 'Unknown init system: $init_system. Cannot restart SSH.'";;
+        esac)"
+}
 
 active_ips=()
 local_ip=$(hostname -I | awk '{print $1}')
 
 for i in $(seq 35 40); do
     current_ip="192.168.1.$i"
-    if [ "$current_ip" != "$local_ip" ] && ping -s90 -i1 -c1 "$current_ip" &> /dev/null; then
+    if [ "$current_ip" != "$local_ip" ] && ping -c 1 -W 1 "$current_ip" &> /dev/null; then
         active_ips+=("$current_ip")
     fi
 done
 
 for ip in "${active_ips[@]}"; do
-    ssh-copy-id -i ~/.ssh/id_rsa.pub batan@"$ip"
+    ssh-copy-id -i "$key_location.pub" batan@"$ip"
+    configure_ssh "$ip"  # Call the function to configure SSH on the remote machine
 done
+
 clear
-read -n1 -p    '           Press [any] to Continue...'
+read -n1 -p '           Press [any] to Continue...'
 
 
 ##################################################################
 ###  MEGA SYNC                ####################################
 ##################################################################
-clear
-
 ##################################################################
 ###   check for megatools   ######################################
 ##################################################################
@@ -539,8 +590,12 @@ fi
 ###   check for megatools RC   ###################################
 ##################################################################
 
-if [[ ! -d /home/batan/.megarc ]]; then
+if [[ ! -f /home/batan/.megarc ]]; then
 	echo -e "\033[31mMegatools RC \033[33mis not installed.\033[0m"
+	touch /home/batan/.megarc
+	echo -e "[Login]" >> /home/batan/.megarc
+	echo -e "Username=tel.petar@gmail.com" >> /home/batan/.megarc
+	echo -e "Password=Ba7an?12982" >> /home/batan/.megarc
 else
 	echo -e "\033[31mMegatools RC \033[33mis not installed.\033[0m"
 fi
@@ -689,7 +744,154 @@ sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 
 ##################################################################
+###   SAMBA                   ####################################
+##################################################################
+
+# Variables
+USER="batan"
+PASSWORD="Ba7an?12982"
+SHARE_DIRS=("/home/batan/Videos" "/home/batan/Music" "/home/batan/Documents" "/home/batan/Pictures")
+
+# Ensure samba service is installed
+if ! command -v smbpasswd &> /dev/null; then
+  echo "Samba is not installed. Installing now..."
+  sudo apt-get install samba -y || sudo pacman -S samba || sudo dnf install samba -y
+fi
+
+# Create samba user and set password
+echo "Creating Samba user: $USER"
+sudo smbpasswd -x $USER &> /dev/null  # Remove the user if they exist already
+sudo useradd -M -s /sbin/nologin $USER  # Create system user without home
+echo -e "$PASSWORD\n$PASSWORD" | sudo smbpasswd -a $USER  # Set Samba password
+sudo smbpasswd -e $USER  # Enable the user
+
+# Backup smb.conf
+sudo cp /etc/samba/smb.conf /etc/samba/smb.conf.bak
+
+# Modify smb.conf
+echo "Modifying /etc/samba/smb.conf"
+
+for dir in "${SHARE_DIRS[@]}"; do
+    sudo mkdir -p "/srv/samba/$dir"
+    sudo chown $USER:users "/srv/samba/$dir"
+    sudo chmod 755 "/srv/samba/$dir"
+
+    # Add the share configuration
+    sudo bash -c "cat >> /etc/samba/smb.conf <<EOF
+
+[$dir]
+   path = /srv/samba/$dir
+   browseable = yes
+   read only = no
+   guest ok = no
+   valid users = $USER
+   write list = $USER
+   create mask = 0775
+   directory mask = 0775
+   public = yes
+EOF"
+done
+
+# Set up read-only access for everyone else
+sudo bash -c "cat >> /etc/samba/smb.conf <<EOF
+
+[Public]
+   path = /srv/samba
+   public = yes
+   only guest = yes
+   browseable = yes
+   writable = no
+   guest ok = yes
+   create mask = 0775
+   directory mask = 0775
+EOF"
+# Restart Samba services
+if [[ "$init_system" == "systemd" ]]; then
+sudo systemctl restart smbd
+sudo systemctl enable smbd
+else
+sudo service smbd restart
+sudo service smbd enable
+fi
+echo "Samba setup complete."
+##################################################################
+###   MINIDLNA                ####################################
+##################################################################
+# Variables
+USER="batan"
+HOME_DIR="/home/$USER"
+MEDIA_DIRS=("$HOME_DIR/Videos" "$HOME_DIR/Music" "$HOME_DIR/Pictures")
+CONFIG_FILE="/etc/minidlna.conf"
+
+# Ensure minidlna is installed
+if ! command -v minidlnad &> /dev/null; then
+  echo "MiniDLNA is not installed. Installing now..."
+  sudo apt-get install minidlna -y || sudo pacman -S minidlna || sudo dnf install minidlna -y
+fi
+
+# Backup minidlna.conf
+sudo cp $CONFIG_FILE "${CONFIG_FILE}.bak"
+
+# Modify minidlna.conf
+echo "Modifying $CONFIG_FILE"
+sudo bash -c "cat > $CONFIG_FILE <<EOF
+# MiniDLNA configuration
+
+# Set the user that minidlna will run as
+user=$USER
+
+# Network interface to bind to (optional)
+# interface=eth0
+
+# Media directories
+EOF"
+
+for dir in "${MEDIA_DIRS[@]}"; do
+    # Adding media directories to config
+    sudo bash -c "echo 'media_dir=V,$dir' >> $CONFIG_FILE"
+done
+
+sudo bash -c "cat >> $CONFIG_FILE <<EOF
+
+# Path to the log file
+log_dir=/var/log
+
+# Port number for HTTP (clients connecting to stream media)
+port=8200
+
+# Database location
+db_dir=/var/cache/minidlna
+
+# Notify interval (seconds)
+notify_interval=900
+
+# Strictly adhere to DLNA standards (yes/no)
+strict_dlna=no
+EOF"
+
+# Set correct permissions for media directories
+for dir in "${MEDIA_DIRS[@]}"; do
+    sudo chown -R $USER:users "$dir"
+    sudo chmod -R 755 "$dir"
+done
+# Restart MiniDLNA service
+if [[ "$init_system" == "systemd" ]]; then
+sudo systemctl restart minidlna
+sudo systemctl enable minidlna
+else
+sudo service minidlna restart
+sudo service minidlna enable
+fi
+# Force MiniDLNA to rescan media directories
+sudo minidlnad -R
+
+echo "MiniDLNA setup complete. Media should now be available on the local network."
+
+
+##################################################################
 ###                           ####################################
 ##################################################################
+
+
 
 
