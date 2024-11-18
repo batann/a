@@ -1,0 +1,58 @@
+
+
+#!/bin/bash
+
+# Function to install LAMP stack
+install_lamp() {
+    echo "Updating package list..."
+    sudo apt update
+
+    echo "Installing Apache..."
+    sudo apt install -y apache2
+
+    echo "Installing MariaDB..."
+    sudo apt install -y mariadb-server
+
+    echo "Running MySQL secure installation..."
+    sudo mysql_secure_installation <<EOF
+
+y
+$MYSQL_ROOT_PASSWORD
+y
+y
+y
+y
+EOF
+
+    echo "Installing PHP..."
+    sudo apt install -y php libapache2-mod-php php-mysql
+
+    echo "Installing phpMyAdmin..."
+    sudo apt install -y phpmyadmin
+
+    echo "Configuring Apache to work with phpMyAdmin..."
+    echo "Include /etc/phpmyadmin/apache.conf" | sudo tee -a /etc/apache2/apache2.conf
+
+    echo "Restarting Apache..."
+    sudo systemctl restart apache2
+
+    echo "LAMP installation completed."
+}
+
+# User input section
+echo "Do you want to install the LAMP server? (yes/no)"
+read -r INSTALL_LAMP
+
+if [[ "$INSTALL_LAMP" == "yes" ]]; then
+    echo "Please provide the following information for the MySQL root user."
+
+    echo "Enter MySQL root password:"
+    read -r MYSQL_ROOT_PASSWORD
+
+    install_lamp
+else
+    echo "Skipping LAMP installation."
+fi
+
+echo "Script completed."
+
